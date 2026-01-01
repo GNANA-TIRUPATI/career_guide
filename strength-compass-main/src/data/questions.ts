@@ -1,0 +1,117 @@
+import { Question } from '@/types/strength';
+
+export const ASSESSMENT_QUESTIONS: Question[] = [
+  {
+    id: 'q1',
+    type: 'mcq',
+    question: 'When faced with a complex problem at work, what is your first instinct?',
+    options: [
+      { id: 'a', text: 'Break it down into smaller, manageable parts', strengthWeights: { analytical: 1.5, problem: 1 } },
+      { id: 'b', text: 'Brainstorm multiple creative solutions', strengthWeights: { creative: 1.5, problem: 0.5 } },
+      { id: 'c', text: 'Discuss it with the team to gather perspectives', strengthWeights: { communication: 1.5, leadership: 0.5 } },
+      { id: 'd', text: 'Consider how it fits into the bigger picture', strengthWeights: { strategic: 1.5, leadership: 0.5 } },
+    ],
+    strengthTargets: ['analytical', 'creative', 'problem', 'strategic'],
+  },
+  {
+    id: 'q2',
+    type: 'scenario',
+    question: 'How would you handle this situation?',
+    scenario: 'Your team is behind on a critical deadline. The client is getting anxious, and team morale is dropping. You have limited resources and cannot extend the deadline.',
+    options: [
+      { id: 'a', text: 'Prioritize tasks ruthlessly and cut non-essential features', strengthWeights: { strategic: 1.5, problem: 1 } },
+      { id: 'b', text: 'Rally the team with motivation and take on extra work yourself', strengthWeights: { leadership: 1.5, emotional: 1 } },
+      { id: 'c', text: 'Communicate transparently with the client about realistic expectations', strengthWeights: { communication: 1.5, emotional: 0.5 } },
+      { id: 'd', text: 'Analyze the bottlenecks and optimize the workflow', strengthWeights: { analytical: 1.5, problem: 1 } },
+    ],
+    strengthTargets: ['leadership', 'emotional', 'strategic', 'problem'],
+  },
+  {
+    id: 'q3',
+    type: 'mcq',
+    question: 'How do you typically learn a new skill?',
+    options: [
+      { id: 'a', text: 'Read documentation and understand the theory first', strengthWeights: { analytical: 1.5, learning: 1 } },
+      { id: 'b', text: 'Jump in and learn by experimenting', strengthWeights: { creative: 1, learning: 1.5 } },
+      { id: 'c', text: 'Watch tutorials and follow along step-by-step', strengthWeights: { learning: 1.5, problem: 0.5 } },
+      { id: 'd', text: 'Find a mentor or peer to guide the learning process', strengthWeights: { communication: 1, learning: 1 } },
+    ],
+    strengthTargets: ['learning', 'analytical', 'creative'],
+  },
+  {
+    id: 'q4',
+    type: 'text',
+    question: 'Describe a challenging situation you overcame and what you learned from it.',
+    timeLimit: 180,
+    strengthTargets: ['emotional', 'problem', 'communication', 'learning'],
+  },
+  {
+    id: 'q5',
+    type: 'scenario',
+    question: 'What approach would you take?',
+    scenario: 'You are leading a project where two team members have conflicting ideas about the technical direction. Both approaches have merit, but the team needs to decide quickly.',
+    options: [
+      { id: 'a', text: 'Facilitate a structured debate and make the final call', strengthWeights: { leadership: 1.5, communication: 1 } },
+      { id: 'b', text: 'Analyze both approaches objectively using data', strengthWeights: { analytical: 1.5, problem: 1 } },
+      { id: 'c', text: 'Find a creative hybrid solution that incorporates both ideas', strengthWeights: { creative: 1.5, problem: 0.5 } },
+      { id: 'd', text: 'Consider long-term implications and scalability', strengthWeights: { strategic: 1.5, analytical: 0.5 } },
+    ],
+    strengthTargets: ['leadership', 'analytical', 'creative', 'strategic'],
+  },
+  {
+    id: 'q6',
+    type: 'mcq',
+    question: 'When working on a team project, you naturally tend to:',
+    options: [
+      { id: 'a', text: 'Take charge and coordinate the team efforts', strengthWeights: { leadership: 1.5, strategic: 0.5 } },
+      { id: 'b', text: 'Focus on the details and ensure quality', strengthWeights: { analytical: 1.5, problem: 0.5 } },
+      { id: 'c', text: 'Generate ideas and bring fresh perspectives', strengthWeights: { creative: 1.5, communication: 0.5 } },
+      { id: 'd', text: 'Support teammates and maintain group harmony', strengthWeights: { emotional: 1.5, communication: 1 } },
+    ],
+    strengthTargets: ['leadership', 'analytical', 'creative', 'emotional'],
+  },
+  {
+    id: 'q7',
+    type: 'mcq',
+    question: 'Under high pressure, you typically:',
+    options: [
+      { id: 'a', text: 'Stay calm and methodically work through the problem', strengthWeights: { emotional: 1.5, analytical: 1 } },
+      { id: 'b', text: 'Feel energized and perform even better', strengthWeights: { emotional: 1.5, leadership: 0.5 } },
+      { id: 'c', text: 'Seek support from others and communicate needs', strengthWeights: { communication: 1.5, emotional: 0.5 } },
+      { id: 'd', text: 'Reprioritize and focus on what matters most', strengthWeights: { strategic: 1.5, problem: 1 } },
+    ],
+    strengthTargets: ['emotional', 'leadership', 'strategic'],
+  },
+  {
+    id: 'q8',
+    type: 'text',
+    question: 'If you had unlimited resources, what problem would you solve and how?',
+    timeLimit: 180,
+    strengthTargets: ['creative', 'strategic', 'problem', 'leadership'],
+  },
+  {
+    id: 'q9',
+    type: 'scenario',
+    question: 'How would you approach this opportunity?',
+    scenario: 'You have the chance to lead a new initiative at your company. It\'s high-risk but could have significant impact. You\'ll need to build a team and convince stakeholders.',
+    options: [
+      { id: 'a', text: 'Develop a comprehensive business case with data', strengthWeights: { analytical: 1.5, strategic: 1 } },
+      { id: 'b', text: 'Create a compelling vision and pitch to stakeholders', strengthWeights: { communication: 1.5, leadership: 1 } },
+      { id: 'c', text: 'Start small with a proof of concept to reduce risk', strengthWeights: { problem: 1.5, strategic: 0.5 } },
+      { id: 'd', text: 'Focus on building the right team first', strengthWeights: { leadership: 1.5, emotional: 0.5 } },
+    ],
+    strengthTargets: ['leadership', 'strategic', 'communication', 'problem'],
+  },
+  {
+    id: 'q10',
+    type: 'mcq',
+    question: 'When explaining a complex concept to someone, you prefer to:',
+    options: [
+      { id: 'a', text: 'Use analogies and visual metaphors', strengthWeights: { creative: 1.5, communication: 1 } },
+      { id: 'b', text: 'Break it down into logical steps', strengthWeights: { analytical: 1.5, communication: 0.5 } },
+      { id: 'c', text: 'Relate it to their personal experience', strengthWeights: { emotional: 1, communication: 1.5 } },
+      { id: 'd', text: 'Provide examples and hands-on demonstrations', strengthWeights: { learning: 1.5, communication: 1 } },
+    ],
+    strengthTargets: ['communication', 'creative', 'analytical', 'learning'],
+  },
+];
