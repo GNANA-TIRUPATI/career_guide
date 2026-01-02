@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { STRENGTHS, StrengthType } from '@/types/strength';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { AuthWidget } from '@/components/AuthWidget';
 import {
   Brain,
   ArrowRight,
@@ -37,6 +38,11 @@ export function LandingPage({ onStart }: LandingPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Auth Widget - Fixed Position */}
+      <div className="fixed top-4 right-4 z-50">
+        <AuthWidget />
+      </div>
+
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background */}
@@ -90,7 +96,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Beyond marks and resumes. Our ML engine analyzes your behavioral patterns 
+              Beyond marks and resumes. Our ML engine analyzes your behavioral patterns
               to reveal cognitive strengths you didn't know you had.
             </p>
 
@@ -204,7 +210,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
               ML-Powered Analysis
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our system analyzes behavioral patterns, not just answers. Here's how machine learning 
+              Our system analyzes behavioral patterns, not just answers. Here's how machine learning
               reveals your hidden strengths.
             </p>
           </motion.div>
@@ -331,7 +337,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
                   Ready to Discover Your Strengths?
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-                  10 questions. No marks. No resumes. Just your natural behavioral patterns 
+                  10 questions. No marks. No resumes. Just your natural behavioral patterns
                   revealing what you're truly built for.
                 </p>
                 <Button onClick={onStart} variant="hero" size="xl">

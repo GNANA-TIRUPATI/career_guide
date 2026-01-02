@@ -3,9 +3,12 @@ import { motion } from 'framer-motion';
 import { AssessmentResult, StrengthType, STRENGTHS } from '@/types/strength';
 import { StrengthCard } from '@/components/StrengthCard';
 import { StrengthRadar } from '@/components/StrengthRadar';
+import { FeedbackCollector } from '@/components/FeedbackCollector';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 import {
   ArrowLeft,
   Download,
@@ -15,6 +18,7 @@ import {
   Sparkles,
   TrendingUp,
   Target,
+  MessageSquare,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -27,6 +31,9 @@ export function ResultsDashboard({ result, onRestart }: ResultsDashboardProps) {
   const [expandedStrength, setExpandedStrength] = useState<StrengthType | null>(
     result.primaryStrength
   );
+  const [showFeedback, setShowFeedback] = useState(!result.feedbackCollected);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const primaryStrength = STRENGTHS[result.primaryStrength];
   const scores = result.strengths.reduce((acc, s) => {
@@ -34,13 +41,107 @@ export function ResultsDashboard({ result, onRestart }: ResultsDashboardProps) {
     return acc;
   }, {} as Record<StrengthType, number>);
 
+  const handleExportPDF = () => {
+    try {
+      // Create a text summary of results
+      const summary = `
+STRENGTH ASSESSMENT RESULTS
+============================
+
+Primary Strength: ${primaryStrength.name}
+${primaryStrength.description}
+
+STRENGTH BREAKDOWN:
+${result.strengths.map((s, i) => {
+        const strength = STRENGTHS[s.strengthId];
+        return `${i + 1}. ${strength.name}: ${s.score.toFixed(1)}% (Confidence: ${s.confidence.toFixed(1)}%)`;
+      }).join('\n')}
+
+CAREER RECOMMENDATIONS:
+${result.careerRecommendations.map((c, i) => `${i + 1}. ${c}`).join('\n')}
+
+LEARNING PATH:
+${result.learningPath.map((l, i) => `${i + 1}. ${l.skill} (${l.priority.toUpperCase()} priority)`).join('\n')}
+
+Generated: ${new Date().toLocaleString()}
+      `.trim();
+
+      // Create a downloadable text file (since jsPDF isn't fully implemented)
+      const blob = new Blob([summary], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `strength-assessment-${Date.now()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Export Successful!",
+        description: "Your results have been downloaded as a text file.",
+      });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "There was an error exporting your results. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      const shareText = `I just completed my Strength Assessment! My primary strength is ${primaryStrength.name}. Check out this amazing tool!`;
+      const shareUrl = window.location.href;
+
+      // Check if Web Share API is available
+      if (navigator.share) {
+        await navigator.share({
+          title: 'My Strength Assessment Results',
+          text: shareText,
+          url: shareUrl,
+        });
+        toast({
+          title: "Shared Successfully!",
+          description: "Thanks for sharing your results!",
+        });
+      } else {
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+        toast({
+          title: "Copied to Clipboard!",
+          description: "Share link has been copied. Paste it anywhere to share!",
+        });
+      }
+    } catch (error) {
+      console.error('Share error:', error);
+      // If share was cancelled or failed, just show a helpful message
+      if (error instanceof Error && error.name !== 'AbortError') {
+        toast({
+          title: "Share",
+          description: "Copy the URL from your browser to share your results!",
+        });
+      }
+    }
+  };
+
+  const handleFeedbackSubmit = () => {
+    setShowFeedback(false);
+    // Save assessment to localStorage
+    const savedAssessments = JSON.parse(localStorage.getItem('assessments') || '[]');
+    savedAssessments.push({ ...result, feedbackCollected: true });
+    localStorage.setItem('assessments', JSON.stringify(savedAssessments));
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero opacity-5" />
         <div className="absolute inset-0 bg-gradient-glow" />
-        
+
         <div className="relative max-w-6xl mx-auto px-4 py-12">
           <div className="flex items-center justify-between mb-8">
             <Button variant="ghost" onClick={onRestart}>
@@ -48,11 +149,11 @@ export function ResultsDashboard({ result, onRestart }: ResultsDashboardProps) {
               Start Over
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleShare}>
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleExportPDF}>
                 <Download className="w-4 h-4 mr-2" />
                 Export PDF
               </Button>
@@ -77,6 +178,12 @@ export function ResultsDashboard({ result, onRestart }: ResultsDashboardProps) {
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               {primaryStrength.description}
             </p>
+            {result.userDomain && (
+              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-sm font-medium">
+                <Target className="w-4 h-4" />
+                Optimized for {result.userDomain} domain
+              </div>
+            )}
           </motion.div>
 
           {/* Radar Chart */}
@@ -93,6 +200,24 @@ export function ResultsDashboard({ result, onRestart }: ResultsDashboardProps) {
 
       {/* Detailed Results */}
       <div className="max-w-6xl mx-auto px-4 py-12">
+
+        {/* Feedback Section */}
+        {showFeedback && (
+          <section className="mb-16">
+            <div className="flex items-center gap-3 mb-6">
+              <MessageSquare className="w-6 h-6 text-primary" />
+              <h2 className="text-2xl font-display font-semibold text-foreground">
+                Your Feedback
+              </h2>
+            </div>
+            <FeedbackCollector
+              assessmentId={result.id}
+              userId={user?.id || result.userId}
+              onFeedbackSubmit={handleFeedbackSubmit}
+            />
+          </section>
+        )}
+
         {/* Strength Cards Grid */}
         <section className="mb-16">
           <div className="flex items-center gap-3 mb-6">
@@ -217,9 +342,9 @@ export function ResultsDashboard({ result, onRestart }: ResultsDashboardProps) {
                   How We Analyzed Your Strengths
                 </h3>
                 <p className="text-muted-foreground text-sm mb-4">
-                  Our ML engine extracted {result.strengths.length * 3}+ behavioral features from your responses, 
-                  including response time patterns, answer consistency, text complexity, and decision confidence. 
-                  These features were processed through ensemble models (Random Forest + Gradient Boosting) 
+                  Our ML engine extracted {result.strengths.length * 3}+ behavioral features from your responses,
+                  including response time patterns, answer consistency, text complexity, and decision confidence.
+                  These features were processed through ensemble models (Random Forest + Gradient Boosting)
                   with hybrid labeling to identify your unique strength profile.
                 </p>
                 <div className="flex flex-wrap gap-2">

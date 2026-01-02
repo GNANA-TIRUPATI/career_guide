@@ -1,4 +1,4 @@
-export type StrengthType = 
+export type StrengthType =
   | 'analytical'
   | 'creative'
   | 'problem'
@@ -120,7 +120,16 @@ export interface StrengthResult {
   topFeatures: { name: string; contribution: number }[];
 }
 
+export interface PredictionScenario {
+  type: 'optimistic' | 'neutral' | 'pessimistic';
+  percentage: number;
+  description: string;
+  factors: string[];
+  confidence: number;
+}
+
 export interface AssessmentResult {
+  id: string;
   userId: string;
   completedAt: Date;
   strengths: StrengthResult[];
@@ -128,4 +137,11 @@ export interface AssessmentResult {
   secondaryStrengths: StrengthType[];
   careerRecommendations: string[];
   learningPath: { skill: string; priority: 'high' | 'medium' | 'low' }[];
+  predictions: {
+    careerSuccess: PredictionScenario[];
+    skillMastery: PredictionScenario[];
+    domainFit: PredictionScenario[];
+  };
+  userDomain?: string;
+  feedbackCollected?: boolean;
 }

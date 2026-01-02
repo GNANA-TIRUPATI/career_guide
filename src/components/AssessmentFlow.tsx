@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ASSESSMENT_QUESTIONS } from '@/data/questions';
 import { UserResponse, AssessmentResult } from '@/types/strength';
+import { UserDomain } from '@/types/user';
 import { analyzeResponses } from '@/lib/ml-engine';
 import { AssessmentCard } from '@/components/AssessmentCard';
 import { Button } from '@/components/ui/button';
@@ -10,9 +11,10 @@ import { ArrowLeft, Brain, Loader2 } from 'lucide-react';
 interface AssessmentFlowProps {
   onComplete: (result: AssessmentResult) => void;
   onBack: () => void;
+  userDomain?: UserDomain;
 }
 
-export function AssessmentFlow({ onComplete, onBack }: AssessmentFlowProps) {
+export function AssessmentFlow({ onComplete, onBack, userDomain }: AssessmentFlowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [responses, setResponses] = useState<UserResponse[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -22,7 +24,7 @@ export function AssessmentFlow({ onComplete, onBack }: AssessmentFlowProps) {
       ...response,
       timestamp: Date.now(),
     };
-    
+
     setResponses(prev => [...prev, fullResponse]);
 
     if (currentIndex < ASSESSMENT_QUESTIONS.length - 1) {
@@ -32,11 +34,11 @@ export function AssessmentFlow({ onComplete, onBack }: AssessmentFlowProps) {
       setIsProcessing(true);
       setTimeout(() => {
         const allResponses = [...responses, fullResponse];
-        const result = analyzeResponses(allResponses);
+        const result = analyzeResponses(allResponses, userDomain);
         onComplete(result);
       }, 2000); // Simulate ML processing time
     }
-  }, [currentIndex, responses, onComplete]);
+  }, [currentIndex, responses, onComplete, userDomain]);
 
   if (isProcessing) {
     return (

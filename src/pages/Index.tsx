@@ -1,18 +1,29 @@
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { LandingPage } from '@/components/LandingPage';
+import { DomainSelector } from '@/components/DomainSelector';
 import { AssessmentFlow } from '@/components/AssessmentFlow';
 import { ResultsDashboard } from '@/components/ResultsDashboard';
 import { AssessmentResult } from '@/types/strength';
+import { UserDomain } from '@/types/user';
+import { useAuth } from '@/contexts/AuthContext';
 import { Helmet } from 'react-helmet-async';
 
-type AppState = 'landing' | 'assessment' | 'results';
+type AppState = 'landing' | 'domain' | 'assessment' | 'results';
 
 const Index = () => {
   const [appState, setAppState] = useState<AppState>('landing');
   const [result, setResult] = useState<AssessmentResult | null>(null);
+  const [selectedDomain, setSelectedDomain] = useState<UserDomain | undefined>();
+  const { preferences, setUserDomain } = useAuth();
 
   const handleStartAssessment = () => {
+    setAppState('domain');
+  };
+
+  const handleDomainSelect = (domain: UserDomain) => {
+    setSelectedDomain(domain);
+    setUserDomain(domain);
     setAppState('assessment');
   };
 
@@ -23,6 +34,7 @@ const Index = () => {
 
   const handleRestart = () => {
     setResult(null);
+    setSelectedDomain(undefined);
     setAppState('landing');
   };
 
@@ -30,9 +42,9 @@ const Index = () => {
     <>
       <Helmet>
         <title>Hidden Strength Identifier | ML-Powered Behavioral Analysis</title>
-        <meta 
-          name="description" 
-          content="Discover your hidden cognitive strengths through ML-powered behavioral analysis. No marks, no resumes - just your natural patterns revealing what you're truly built for." 
+        <meta
+          name="description"
+          content="Discover your hidden cognitive strengths through ML-powered behavioral analysis. No marks, no resumes - just your natural patterns revealing what you're truly built for."
         />
         <meta name="keywords" content="strength finder, behavioral analysis, ML assessment, career guidance, cognitive strengths" />
         <link rel="canonical" href="/" />
@@ -42,11 +54,22 @@ const Index = () => {
         {appState === 'landing' && (
           <LandingPage key="landing" onStart={handleStartAssessment} />
         )}
+        {appState === 'domain' && (
+          <div key="domain" className="min-h-screen bg-background flex items-center justify-center p-4">
+            <div className="max-w-5xl w-full">
+              <DomainSelector
+                selectedDomain={selectedDomain}
+                onDomainSelect={handleDomainSelect}
+              />
+            </div>
+          </div>
+        )}
         {appState === 'assessment' && (
           <AssessmentFlow
             key="assessment"
             onComplete={handleAssessmentComplete}
             onBack={handleRestart}
+            userDomain={selectedDomain}
           />
         )}
         {appState === 'results' && result && (

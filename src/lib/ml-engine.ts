@@ -16,9 +16,9 @@ function extractFeatures(responses: UserResponse[]): ExtractedFeatures {
   const times = responses.map(r => r.timeSpent);
   const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
   const variance = times.reduce((sum, t) => sum + Math.pow(t - avgTime, 2), 0) / times.length;
-  
+
   const retries = responses.filter(r => r.retryCount > 0).length;
-  
+
   // Calculate text complexity for text responses
   const textResponses = responses.filter(r => r.textAnswer);
   let textComplexity = 0;
@@ -113,8 +113,140 @@ function generateExplanation(
   };
 }
 
+// Generate prediction scenarios based on strength scores
+function generatePredictionScenarios(
+  strengthResults: StrengthResult[],
+  features: ExtractedFeatures,
+  userDomain?: string
+): {
+  careerSuccess: any[];
+  skillMastery: any[];
+  domainFit: any[];
+} {
+  const primaryScore = strengthResults[0].score;
+  const secondaryScore = strengthResults[1].score;
+
+  // Career Success Predictions
+  const careerSuccess = [
+    {
+      type: 'optimistic' as const,
+      percentage: Math.min(95, primaryScore + 15),
+      description: 'With focused effort and leveraging your primary strengths',
+      factors: [
+        'Strong alignment with natural abilities',
+        'High potential for skill mastery',
+        'Favorable market demand',
+      ],
+      confidence: 85 + Math.random() * 10,
+    },
+    {
+      type: 'neutral' as const,
+      percentage: primaryScore,
+      description: 'Based on current strength profile and typical career trajectories',
+      factors: [
+        'Balanced skill development',
+        'Standard career progression',
+        'Moderate market conditions',
+      ],
+      confidence: 90 + Math.random() * 5,
+    },
+    {
+      type: 'pessimistic' as const,
+      percentage: Math.max(40, primaryScore - 20),
+      description: 'If facing challenges or misalignment with career path',
+      factors: [
+        'Potential skill gaps',
+        'Competitive market conditions',
+        'Need for additional training',
+      ],
+      confidence: 75 + Math.random() * 10,
+    },
+  ];
+
+  // Skill Mastery Predictions
+  const skillMastery = [
+    {
+      type: 'optimistic' as const,
+      percentage: Math.min(98, secondaryScore + 20),
+      description: 'With dedicated practice and optimal learning conditions',
+      factors: [
+        'High learning agility detected',
+        'Strong foundational strengths',
+        'Access to quality resources',
+      ],
+      confidence: 88 + Math.random() * 7,
+    },
+    {
+      type: 'neutral' as const,
+      percentage: secondaryScore + 5,
+      description: 'Following standard learning curves and practice schedules',
+      factors: [
+        'Consistent effort required',
+        'Normal learning progression',
+        'Regular skill application',
+      ],
+      confidence: 92 + Math.random() * 5,
+    },
+    {
+      type: 'pessimistic' as const,
+      percentage: Math.max(35, secondaryScore - 15),
+      description: 'With limited time or resources for skill development',
+      factors: [
+        'Time constraints',
+        'Limited practice opportunities',
+        'Need for structured guidance',
+      ],
+      confidence: 78 + Math.random() * 10,
+    },
+  ];
+
+  // Domain Fit Predictions (if domain specified)
+  const domainBonus = userDomain ? 10 : 0;
+  const domainFit = [
+    {
+      type: 'optimistic' as const,
+      percentage: Math.min(96, (primaryScore + secondaryScore) / 2 + 18 + domainBonus),
+      description: userDomain
+        ? `Excellent alignment with ${userDomain} domain requirements`
+        : 'Strong potential across multiple domains',
+      factors: [
+        userDomain ? `${userDomain} industry growth` : 'Versatile skill set',
+        'Strong cognitive fit',
+        'High adaptability potential',
+      ],
+      confidence: 86 + Math.random() * 9,
+    },
+    {
+      type: 'neutral' as const,
+      percentage: (primaryScore + secondaryScore) / 2 + domainBonus,
+      description: userDomain
+        ? `Good fit for ${userDomain} with room for specialization`
+        : 'Solid foundation for domain selection',
+      factors: [
+        'Balanced strength profile',
+        'Standard domain requirements',
+        'Growth opportunities available',
+      ],
+      confidence: 91 + Math.random() * 5,
+    },
+    {
+      type: 'pessimistic' as const,
+      percentage: Math.max(45, (primaryScore + secondaryScore) / 2 - 15),
+      description: 'May require additional domain-specific training',
+      factors: [
+        'Skill gap identification needed',
+        'Domain-specific challenges',
+        'Additional certifications recommended',
+      ],
+      confidence: 76 + Math.random() * 12,
+    },
+  ];
+
+  return { careerSuccess, skillMastery, domainFit };
+}
+
 // Main analysis function
-export function analyzeResponses(responses: UserResponse[]): AssessmentResult {
+export function analyzeResponses(responses: UserResponse[], userDomain?: string): AssessmentResult {
   const features = extractFeatures(responses);
   const normalizedScores = normalizeScores(features.strengthScores);
 
@@ -164,7 +296,11 @@ export function analyzeResponses(responses: UserResponse[]): AssessmentResult {
     priority,
   }));
 
+  // Generate prediction scenarios
+  const predictions = generatePredictionScenarios(strengthResults, features, userDomain);
+
   return {
+    id: `assessment_${Date.now()}`,
     userId: `user_${Date.now()}`,
     completedAt: new Date(),
     strengths: strengthResults,
@@ -172,5 +308,9 @@ export function analyzeResponses(responses: UserResponse[]): AssessmentResult {
     secondaryStrengths,
     careerRecommendations: Array.from(careerSet).slice(0, 6),
     learningPath: learningPath.slice(0, 8),
+    predictions,
+    userDomain,
+    feedbackCollected: false,
   };
 }
+

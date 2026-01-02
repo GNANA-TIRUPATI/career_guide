@@ -61,8 +61,8 @@ export function AssessmentCard({
     setRetryCount(prev => prev + 1);
   };
 
-  const isComplete = question.type === 'text' 
-    ? textAnswer.trim().length > 20 
+  const isComplete = question.type === 'text'
+    ? textAnswer.trim().length > 10
     : selectedOption !== null;
 
   const progress = (questionNumber / totalQuestions) * 100;
@@ -148,7 +148,7 @@ export function AssessmentCard({
             <Textarea
               value={textAnswer}
               onChange={(e) => setTextAnswer(e.target.value)}
-              placeholder="Share your thoughts... (minimum 20 characters)"
+              placeholder="Share your thoughts... (minimum 10 characters)"
               className="min-h-[150px] text-base resize-none"
             />
             <div className="flex justify-between mt-2 text-sm text-muted-foreground">
